@@ -12,7 +12,7 @@ def send_map(message):
 	photo_first_floor = open(os.getcwd() + '/photo/church_map_first_floor.jpg', 'rb')
 	photo_second_floor = open(os.getcwd() + '/photo/church_map_second_floor.jpg', 'rb')
 
-	bot.send_media_group(message.from_user.id, [InputMediaPhoto(photo_first_floor), InputMediaPhoto(photo_second_floor), InputMediaPhoto(photo_big_hall), caption='Карта церкви «Слово жизни»'], reply_markup=kb_menu.about_us_kb)
+	bot.send_media_group(message.from_user.id, [InputMediaPhoto(photo_first_floor, caption='Карта церкви «Слово жизни»'), InputMediaPhoto(photo_second_floor), InputMediaPhoto(photo_big_hall)])
 
 def answer_message_text(message_text):
 	if message_text == 'О нас':
@@ -49,7 +49,7 @@ def answer_message(message):
 	text = answer_message_text(message.text)
 
 	if message.text == 'Карта церкви':
-		send_map()
+		send_map(message)
 
 	if text != 'Ошибка':
 		bot.send_message(message.from_user.id, text, reply_markup=kb_menu.about_us_kb)
