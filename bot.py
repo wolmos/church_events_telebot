@@ -4,6 +4,7 @@ from telebot.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMar
 
 import config
 from keyboards import kb_menu
+from keyboards import inline_donate
 
 bot = telebot.TeleBot(config.bot_token)
 
@@ -74,8 +75,14 @@ def get_back_reply_markup(message):
 @bot.message_handler(regexp='Пожертвование', func=check_is_private_chat)
 def donate_message(message):
 	try:
-		print(message)
-		bot.send_message(message.from_user.id, 'https://wolrus.org/donate', reply_markup=kb_menu.menu_kb)
+		donate_msg = '''Добровольное пожертвование – намного удобнее онлайн, а также ещё один способ вашего участия в жизни церкви.
+Ниже вы видите кнопки с разными видами пожертвований:
+• целевое – ваши десятины;
+• молодежный центр (второе здание) – ваша помощь в ремонте и открытии;
+• другое – помощь служениям церкви (смотрите по ссылке).
+
+Спасибо за ваши пожертвования!'''
+		bot.send_message(message.from_user.id, donate_msg, reply_markup=inline_donate.donate_kb)
 	except Exception as e:
 		print(e)
 
