@@ -8,6 +8,7 @@ menu_kb.row('Пожертвовать')
 # Группировка кнопок раздела "Мероприятия"
 event_kb = ReplyKeyboardMarkup(resize_keyboard=True)
 event_kb.row('Расписание на неделю', 'Анонсы')
+event_kb.row('Назад')
 
 # Группировка кнопок раздела "О нас"
 
