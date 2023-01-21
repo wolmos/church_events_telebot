@@ -9,7 +9,9 @@ from keyboards import inline_donate
 bot = telebot.TeleBot(config.bot_token)
 
 SCHEDULE_MESSAGE_ID = int()
-CHANNEL_ID = int()
+SCHEDULE_CHANNEL_ID = int()
+n = 1
+ANNOUNCE_DICT = dict()
 
 def check_group_is_wolrus(message):
 	try:
@@ -44,9 +46,7 @@ def answer_message_text(message_text):
 		return """Мы в соцсетях
 
 Телеграм: https://t.me/wolrusyouth_msk
-ВКонтакте: https://vk.com/wolrusyouth
-YouTube: https://www.youtube.com/c/wolrustv/videos 
-Яндекс.Дзен: https://clck.ru/dZS3L
+YouTube: https://www.youtube.com/c/wolrustv/videos
 
 Сайт церкви «Слово жизни» https://wolrus.org
 
@@ -60,7 +60,7 @@ YouTube: https://www.youtube.com/c/wolrustv/videos
 @bot.message_handler(commands=['start'], func=check_is_private_chat)
 def first_message(message):
 	try:
-		start_text = 'Привет, это церковынй бот!\nЗдесь ты найдешь основную информацию о церкви и предстоящих событиях. Выбери первый запрос:'
+		start_text = 'Привет, это церковный бот!\nЗдесь ты найдешь основную информацию о церкви и предстоящих событиях. Выбери первый запрос:'
 		bot.send_message(message.from_user.id, start_text, reply_markup=kb_menu.menu_kb)
 	except Exception as e:
 		print(e)
@@ -72,41 +72,69 @@ def get_back_reply_markup(message):
 	except Exception as e:
 		print(e)
 
-@bot.message_handler(regexp='Пожертвование', func=check_is_private_chat)
+@bot.message_handler(regexp='Пожертвовать', func=check_is_private_chat)
 def donate_message(message):
 	try:
-		donate_msg = '''Добровольное пожертвование – намного удобнее онлайн, а также ещё один способ вашего участия в жизни церкви.
+		donate_msg = '''В век современных технологий гораздо удобнее жертвовать онлайн.
+
+Добровольное пожертвование — ещё один способ вашего участия в жизни церкви.
+
 Ниже вы видите кнопки с разными видами пожертвований:
-• целевое – ваши десятины;
-• молодежный центр (второе здание) – ваша помощь в ремонте и открытии;
-• другое – помощь служениям церкви (смотрите по ссылке).
+• пожертвование – ваши десятины, помощь служениям церкви;
+• молодежный центр (второе здание) – ваша помощь в ремонте и открытии здании;
 
 Спасибо за ваши пожертвования!'''
 		bot.send_message(message.from_user.id, donate_msg, reply_markup=inline_donate.donate_kb)
 	except Exception as e:
 		print(e)
 
+@bot.message_handler(regexp='Мероприятия', func=check_is_private_chat)
+def event(message):
+	try:
+		bot.send_message(message.from_user.id, 'Выберите, что вас интересует!', reply_markup=kb_menu.event_kb)
+	except Exception as e:
+		print(e)
+
+@bot.message_handler(regexp='Анонсы', func=check_is_private_chat)
+def resend_announce_from_channel(message):
+	try:
+		for i, y in ANNOUNCE_DICT.items():
+			print(f'{i} === {y}')
+			bot.forward_message(message.from_user.id, y['channel_id'], y['message_id'])
+	except Exception as e:
+		print(e)
+		print('in resend_announce_from_channel()')
+
 @bot.message_handler(regexp='Расписание на неделю', func=check_is_private_chat)
 def resend_week_schedule_from_channel(message):
 	try:
-		bot.forward_message(message.from_user.id, CHANNEL_ID, SCHEDULE_MESSAGE_ID)
+		bot.forward_message(message.from_user.id, SCHEDULE_CHANNEL_ID, SCHEDULE_MESSAGE_ID)
 	except Exception as e:
 		print(e)
 		print('in resend_week_schedule_from_channel()')
 
-@bot.message_handler(content_types=['photo'], func=check_group_is_wolrus)
-def search_new_schedule(message):
+@bot.message_handler(content_types=['photo']) #, func=check_group_is_wolrus
+def search_new_events(message):
 	try:
+		a = 'a'
 		if(message.caption is not None and ('#расписание' in message.caption or '#Расписание' in message.caption)):
 			global SCHEDULE_MESSAGE_ID
-			global CHANNEL_ID
-			CHANNEL_ID = message.chat.id
+			global SCHEDULE_CHANNEL_ID
+			SCHEDULE_CHANNEL_ID = message.chat.id
 			SCHEDULE_MESSAGE_ID = message.message_id
 		else:
 			print('Error, have not #расписание')
+
+		if(message.caption is not None and ('#анонс' in message.caption or '#Анонс' in message.caption)):
+			global ANNOUNCE_DICT, n
+			date = '12.02.2023 18:30:00'
+			ANNOUNCE_DICT.update({a + str(n): {'channel_id': message.chat.id, 'message_id': message.message_id, 'date_to_end': date}})
+			n = n + 1
+		else:
+			print('Error, have not #анонс')
 	except Exception as e:
 		print(e)
-		print('in search_new_schedule()')
+		print('in search_new_events()')
 
 @bot.message_handler(func=check_is_private_chat)
 def answer_message(message):
