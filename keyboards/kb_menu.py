@@ -2,8 +2,12 @@ from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 
 # Группировка кнопок для Меню
 menu_kb = ReplyKeyboardMarkup(resize_keyboard=True)
-menu_kb.row('Расписание на неделю','О нас')
-menu_kb.row('Пожертвование')
+menu_kb.row('Мероприятия','О нас')
+menu_kb.row('Пожертвовать')
+
+# Группировка кнопок раздела "Мероприятия"
+event_kb = ReplyKeyboardMarkup(resize_keyboard=True)
+event_kb.row('Расписание на неделю', 'Анонсы')
 
 # Группировка кнопок раздела "О нас"
 
