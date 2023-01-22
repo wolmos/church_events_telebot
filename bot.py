@@ -32,9 +32,9 @@ def check_is_private_chat(message):
 		print(e)
 
 def send_map(message):
-	photo_big_hall = open(os.getcwd() + '/photo/church_map_big_hall.jpg', 'rb')
-	photo_first_floor = open(os.getcwd() + '/photo/church_map_first_floor.jpg', 'rb')
-	photo_second_floor = open(os.getcwd() + '/photo/church_map_second_floor.jpg', 'rb')
+	photo_big_hall = open(os.getcwd() + '/photo/church_map_big_hall.png', 'rb')
+	photo_first_floor = open(os.getcwd() + '/photo/church_map_first_floor.png', 'rb')
+	photo_second_floor = open(os.getcwd() + '/photo/church_map_second_floor.png', 'rb')
 
 	bot.send_media_group(message.from_user.id, [InputMediaPhoto(photo_first_floor, caption='Карта церкви «Слово жизни»'), InputMediaPhoto(photo_second_floor), InputMediaPhoto(photo_big_hall)])
 
@@ -49,6 +49,16 @@ def answer_message_text(message_text):
 YouTube: https://www.youtube.com/c/wolrustv/videos
 
 Сайт церкви «Слово жизни» https://wolrus.org
+
+Каналы СЖ
+
+1) https://t.me/you_pray
+2) https://t.me/wolrus_msk
+3) https://t.me/wolrusteens Подростки
+4) https://t.me/wolrusyouthph Фотки
+5) https://t.me/gdb_wolrus ГДБ
+6) https://t.me/resisterwolrus Ресистер
+7) https://t.me/rebro_rus Ребро
 
 Присоединяйся к нашим телеграм-чатам по кнопке ниже"""
 	
