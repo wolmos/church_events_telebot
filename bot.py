@@ -43,24 +43,22 @@ def answer_message_text(message_text):
 		return 'Мы современная церковь с древним посланием. \nЦерковь «Слово жизни» — место раскрытия даров и способностей, а также молитвы, поклонения, глубокого изучения Библии и библейского взгляда на разные сферы жизни. \n\nМы рады каждому! ❤️Больше о нас на сайте https://wolrus.org'
 	
 	elif message_text == 'Социальные сети':
-		return """Мы в соцсетях
+		return '''Мы в соцсетях
 
-Телеграм: https://t.me/wolrusyouth_msk
-YouTube: https://www.youtube.com/c/wolrustv/videos
+- молодежный канал церкви (https://t.me/wolrusyouth_msk)
+- YouTube (https://www.youtube.com/c/wolrustv/videos)
 
-Сайт церкви «Слово жизни» https://wolrus.org
+- Сайт церкви «Слово жизни (https://wolrus.org/)
+- Канал церкви (https://t.me/wolrus_msk)
 
-Каналы СЖ
+Другие молодежные каналы:
 
-1) https://t.me/you_pray
-2) https://t.me/wolrus_msk
-3) https://t.me/wolrusteens Подростки
-4) https://t.me/wolrusyouthph Фотки
-5) https://t.me/gdb_wolrus ГДБ
-6) https://t.me/resisterwolrus Ресистер
-7) https://t.me/rebro_rus Ребро
-
-Присоединяйся к нашим телеграм-чатам по кнопке ниже"""
+• молитвенный канал  (https://t.me/you_pray)
+• подростковый канал  (https://t.me/wolrusteens)
+• фото с мероприятий  (https://t.me/wolrusyouthph)
+• проект Год для Бога (https://t.me/gdb_wolrus)
+• женский канал Ресистер (https://t.me/resisterwolrus)
+• мужской канал Ребро (https://t.me/rebro_rus)'''
 	
 	elif message_text == 'Чаты':
 		return 'У нас есть разные чаты по интересам. Переходи по ссылке, вступай в понравившиеся чаты и находи компанию, с которой будет комфортно дружить: https://taplink.cc/chats'
