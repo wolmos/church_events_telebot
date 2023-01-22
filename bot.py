@@ -45,20 +45,20 @@ def answer_message_text(message_text):
 	elif message_text == 'Социальные сети':
 		return '''Мы в соцсетях
 
-- молодежный канал церкви (https://t.me/wolrusyouth_msk)
-- YouTube (https://www.youtube.com/c/wolrustv/videos)
+- <a href="https://t.me/wolrusyouth_msk">молодежный канал церкви</a>
+- <a href="https://www.youtube.com/c/wolrustv/videos">YouTube</a>
 
-- Сайт церкви «Слово жизни (https://wolrus.org/)
-- Канал церкви (https://t.me/wolrus_msk)
+- <a href="https://wolrus.org/">Сайт церкви «Слово жизни</a>
+- <a href="https://t.me/wolrus_msk">Канал церкви</a>
 
 Другие молодежные каналы:
 
-• молитвенный канал  (https://t.me/you_pray)
-• подростковый канал  (https://t.me/wolrusteens)
-• фото с мероприятий  (https://t.me/wolrusyouthph)
-• проект Год для Бога (https://t.me/gdb_wolrus)
-• женский канал Ресистер (https://t.me/resisterwolrus)
-• мужской канал Ребро (https://t.me/rebro_rus)'''
+• <a href="https://t.me/you_pray">молитвенный канал</a>
+• <a href="https://t.me/wolrusteens">подростковый канал</a>
+• <a href="https://t.me/wolrusyouthph">фото с мероприятий</a>
+• <a href="https://t.me/gdb_wolrus">проект Год для Бога</a>
+• <a href="https://t.me/resisterwolrus">женский канал Ресистер</a>
+• <a href="https://t.me/rebro_rus">мужской канал Ребро</a>'''
 	
 	elif message_text == 'Чаты':
 		return 'У нас есть разные чаты по интересам. Переходи по ссылке, вступай в понравившиеся чаты и находи компанию, с которой будет комфортно дружить: https://taplink.cc/chats'
@@ -153,7 +153,7 @@ def answer_message(message):
 			send_map(message)
 
 		if text != 'Ошибка':
-			bot.send_message(message.from_user.id, text, reply_markup=kb_menu.about_us_kb)
+			bot.send_message(message.from_user.id, text, reply_markup=kb_menu.about_us_kb, parse_mode='HTML')
 	except Exception as e:
 		print(e)
 
