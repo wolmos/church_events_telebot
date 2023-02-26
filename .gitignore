@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Temp files
+schedule_data.txt
+announce_data.txt
