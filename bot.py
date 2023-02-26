@@ -7,9 +7,6 @@ from keyboards import kb_menu
 from keyboards import inline_donate
 
 bot = telebot.TeleBot(config.bot_token)
-
-SCHEDULE_MESSAGE_ID = int()
-SCHEDULE_CHANNEL_ID = int()
 n = 1
 ANNOUNCE_DICT = dict()
 
@@ -116,20 +113,25 @@ def resend_announce_from_channel(message):
 @bot.message_handler(regexp='Расписание на неделю', func=check_is_private_chat)
 def resend_week_schedule_from_channel(message):
 	try:
+		f = open('schedule_data.txt')
+		id_array = [line.strip() for line in f]
+		SCHEDULE_CHANNEL_ID = int(id_array[0])
+		SCHEDULE_MESSAGE_ID = int(id_array[1])
+		f.close()
+
 		bot.forward_message(message.from_user.id, SCHEDULE_CHANNEL_ID, SCHEDULE_MESSAGE_ID)
 	except Exception as e:
 		print(e)
 		print('in resend_week_schedule_from_channel()')
 
-@bot.message_handler(content_types=['photo']) #, func=check_group_is_wolrus
+@bot.message_handler(content_types=['photo'])
 def search_new_events(message):
 	try:
 		a = 'a'
 		if(message.caption is not None and ('#расписание' in message.caption or '#Расписание' in message.caption)):
-			global SCHEDULE_MESSAGE_ID
-			global SCHEDULE_CHANNEL_ID
-			SCHEDULE_CHANNEL_ID = message.chat.id
-			SCHEDULE_MESSAGE_ID = message.message_id
+			f = open('schedule_data.txt', 'w')
+			f.write(f'{message.chat.id}\n{message.message_id}')
+			f.close()
 		else:
 			print('Error, have not #расписание')
 
