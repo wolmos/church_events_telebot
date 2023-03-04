@@ -12,7 +12,7 @@ event_kb = ReplyKeyboardMarkup(resize_keyboard=True)
 # event_kb.row('Назад')
 
 # Группировка кнопок раздела "О нас"
-
 about_us_kb = ReplyKeyboardMarkup(resize_keyboard=True)
 about_us_kb.row('Социальные сети', 'Чаты')
-about_us_kb.row('Карта церкви', 'Назад')
+about_us_kb.row('Карта церкви', 'Домашние группы')
+about_us_kb.row('Назад')
