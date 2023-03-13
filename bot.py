@@ -99,6 +99,18 @@ def check_home_group_in_station(station):
     return station.lower() in get_list_subway_of_home_group(ENGINE)
 
 
+def check_is_have_hg_nearby(station):
+    f = open('nearby.json')
+    subways_with_nearby = json.load(f)
+    f.close()
+
+    for i in subways_with_nearby.keys():
+        for v in subways_with_nearby[i]:
+            if station.lower() == v.lower():
+                return True
+    return False
+
+
 def check_group_is_wolrus(message):
     try:
         if (message.forward_from_chat.type == 'channel' and
@@ -263,6 +275,7 @@ def nearby_home_groups_info(message):
         text = ''
         f = open('nearby.json')
         subways_with_nearby = json.load(f)
+        f.close()
 
         for i in subways_with_nearby.keys():
             for v in subways_with_nearby[i]:
@@ -305,10 +318,14 @@ def get_home_group_info(message):
                 text = text + f'{i["type_of_hg"]} {i["type_age"]}\n{i["weekday"]} {i["time_of_hg"]}\nЛидер: {i["name_leader"]}\nСтанция: {i["subway"]}\n\n'
 
             bot.send_message(message.from_user.id, text, reply_markup=inline_button.hg_kb)
+        elif check_is_have_hg_nearby(STATION):
+            text = 'К сожалению, на этой станции метро еще не проходят домашки, но можем предложить вам домашки на ближайших станциях.'
+            bot.send_message(message.from_user.id, text, reply_markup=kb_menu.homegroups_kb, parse_mode='HTML')
         else:
-            bot.send_message(message.from_user.id,
-                             'К сожалению, на этой станции метро еще не проходят домашки, но можем предложить вам домашки на ближайших станциях.',
-                             reply_markup=kb_menu.homegroups_kb, parse_mode='HTML')
+            text = '''К сожалению, на этой станции метро еще не проходят домашки, но можем предложить вам домашки на ближайших станциях.
+
+https://wolrus.org/homegroup'''
+            bot.send_message(message.from_user.id, text, reply_markup=kb_menu.about_us_kb, parse_mode='HTML')
     except Exception as e:
         print(e)
 
