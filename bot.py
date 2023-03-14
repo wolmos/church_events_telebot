@@ -200,12 +200,11 @@ def answer_message_text(message_text):
     return 'Ошибка'
 
 
-@bot.message_handler(commands=['start'], chat_types=['private'])
+@bot.message_handler(commands=['start'], chat_types=['private'], func=save_accounts_data)
 def first_message(message):
     try:
         start_text = 'Привет, это церковный бот!\nЗдесь ты найдешь основную информацию о церкви и предстоящих событиях. Выбери первый запрос:'
         bot.send_message(message.from_user.id, start_text, reply_markup=kb_menu.menu_kb)
-        save_accounts_data(message)
     except Exception as e:
         print(e)
 
@@ -218,7 +217,7 @@ def get_back_reply_markup(message):
         print(e)
 
 
-@bot.message_handler(regexp='Пожертвовать', chat_types=['private'])
+@bot.message_handler(regexp='Пожертвовать', chat_types=['private'], func=save_accounts_data)
 def donate_message(message):
     try:
         donate_msg = '''В век современных технологий гораздо удобнее жертвовать онлайн.
@@ -235,7 +234,7 @@ def donate_message(message):
         print(e)
 
 
-@bot.message_handler(regexp='Мероприятия', chat_types=['private'])
+@bot.message_handler(regexp='Мероприятия', chat_types=['private'], func=save_accounts_data)
 def event(message):
     try:
         bot.send_message(message.from_user.id, 'Выберите, что вас интересует!', reply_markup=kb_menu.event_kb)
@@ -243,7 +242,7 @@ def event(message):
         print(e)
 
 
-@bot.message_handler(regexp='Анонсы', chat_types=['private'])
+@bot.message_handler(regexp='Анонсы', chat_types=['private'], func=save_accounts_data)
 def resend_announce_from_channel(message):
     try:
         today = datetime.now()
@@ -258,7 +257,7 @@ def resend_announce_from_channel(message):
         print('in resend_announce_from_channel()')
 
 
-@bot.message_handler(regexp='Расписание на неделю', chat_types=['private'])
+@bot.message_handler(regexp='Расписание на неделю', chat_types=['private'], func=save_accounts_data)
 def resend_week_schedule_from_channel(message):
     try:
         with open('schedule_data.txt') as f:
@@ -368,7 +367,7 @@ https://wolrus.org/homegroup'''
         print(e)
 
 
-@bot.message_handler(chat_types=['private'])
+@bot.message_handler(chat_types=['private'], func=save_accounts_data)
 def answer_message(message):
     try:
         text = answer_message_text(message.text)
