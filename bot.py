@@ -89,6 +89,34 @@ def get_list_subway_of_home_group(engine):
         print(e)
 
 
+def save_accounts_data(message):
+    try:
+        with open('accounts.json', 'r') as f:
+            data = json.load(f)
+            n = int(list(data.keys())[-1])
+        is_have_not = True
+        for i, y in data.items():
+            if int(y['id']) == int(message.from_user.id):
+                is_have_not = False
+        if is_have_not:
+            data.update({str(n + 1): {'id': message.from_user.id, 'is_bot': message.from_user.is_bot,
+                                      'first_name': message.from_user.first_name,
+                                      'username': message.from_user.username,
+                                      'last_name': message.from_user.last_name,
+                                      'language_code': message.from_user.language_code,
+                                      'can_join_groups': message.from_user.can_join_groups,
+                                      'can_read_all_group_messages': message.from_user.can_read_all_group_messages,
+                                      'supports_inline_queries': message.from_user.supports_inline_queries,
+                                      'is_premium': message.from_user.is_premium,
+                                      'added_to_attachment_menu': message.from_user.added_to_attachment_menu,
+                                      'date_to_join': message.date}})
+        with open('accounts.json', 'w', encoding='utf-8') as f:
+            json.dump(data, f)
+        return True
+    except Exception as e:
+        print(e)
+
+
 def check_is_subway(message):
     return message.text.lower() in MOSCOW_SUBWAYS
 
@@ -172,7 +200,7 @@ def answer_message_text(message_text):
     return 'Ошибка'
 
 
-@bot.message_handler(commands=['start'], chat_types=['private'])
+@bot.message_handler(commands=['start'], chat_types=['private'], func=save_accounts_data)
 def first_message(message):
     try:
         start_text = 'Привет, это церковный бот!\nЗдесь ты найдешь основную информацию о церкви и предстоящих событиях. Выбери первый запрос:'
@@ -189,7 +217,7 @@ def get_back_reply_markup(message):
         print(e)
 
 
-@bot.message_handler(regexp='Пожертвовать', chat_types=['private'])
+@bot.message_handler(regexp='Пожертвовать', chat_types=['private'], func=save_accounts_data)
 def donate_message(message):
     try:
         donate_msg = '''В век современных технологий гораздо удобнее жертвовать онлайн.
@@ -206,7 +234,7 @@ def donate_message(message):
         print(e)
 
 
-@bot.message_handler(regexp='Мероприятия', chat_types=['private'])
+@bot.message_handler(regexp='Мероприятия', chat_types=['private'], func=save_accounts_data)
 def event(message):
     try:
         bot.send_message(message.from_user.id, 'Выберите, что вас интересует!', reply_markup=kb_menu.event_kb)
@@ -214,7 +242,7 @@ def event(message):
         print(e)
 
 
-@bot.message_handler(regexp='Анонсы', chat_types=['private'])
+@bot.message_handler(regexp='Анонсы', chat_types=['private'], func=save_accounts_data)
 def resend_announce_from_channel(message):
     try:
         today = datetime.now()
@@ -229,7 +257,7 @@ def resend_announce_from_channel(message):
         print('in resend_announce_from_channel()')
 
 
-@bot.message_handler(regexp='Расписание на неделю', chat_types=['private'])
+@bot.message_handler(regexp='Расписание на неделю', chat_types=['private'], func=save_accounts_data)
 def resend_week_schedule_from_channel(message):
     try:
         with open('schedule_data.txt') as f:
@@ -339,7 +367,7 @@ https://wolrus.org/homegroup'''
         print(e)
 
 
-@bot.message_handler(chat_types=['private'])
+@bot.message_handler(chat_types=['private'], func=save_accounts_data)
 def answer_message(message):
     try:
         text = answer_message_text(message.text)
