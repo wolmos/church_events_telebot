@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import json
 import telebot
@@ -14,6 +15,7 @@ bot = telebot.TeleBot(config.bot_token)
 ENGINE = create_engine(
     f'postgresql://{config.db_user}:{config.db_password}@{config.db_hostname}:{config.db_port}/{config.db_name}?sslmode=require')
 
+STATION = ''
 MOSCOW_SUBWAYS = ['щелковская', 'авиамоторная', 'автозаводская', 'академическая', 'александровский сад', 'алексеевская',
                   'алма-атинская', 'алтуфьево', 'андроновка', 'аннино', 'арбатская', 'аэропорт', 'бабушкинская',
                   'багратионовская', 'балтийская', 'баррикадная', 'бауманская', 'беговая', 'белокаменная',
@@ -54,10 +56,6 @@ MOSCOW_SUBWAYS = ['щелковская', 'авиамоторная', 'авто�
                   'чеховская', 'чистые пруды', 'чкаловская', 'шаболовская', 'шелепиха', 'шипиловская',
                   'шоссе энтузиастов', 'щёлковская', 'щукинская', 'электрозаводская', 'юго-восточная', 'юго-западная',
                   'южная', 'ясенево', 'киевская', 'озерная']
-
-n = 1
-ANNOUNCE_DICT = dict()
-STATION = ''
 
 
 def get_home_group_master_data(engine):
@@ -100,9 +98,8 @@ def check_home_group_in_station(station):
 
 
 def check_is_have_hg_nearby(station):
-    f = open('nearby.json')
-    subways_with_nearby = json.load(f)
-    f.close()
+    with open('nearby.json') as f:
+        subways_with_nearby = json.load(f)
 
     for i in subways_with_nearby.keys():
         for v in subways_with_nearby[i]:
@@ -220,9 +217,13 @@ def event(message):
 @bot.message_handler(regexp='Анонсы', chat_types=['private'])
 def resend_announce_from_channel(message):
     try:
-        for i, y in ANNOUNCE_DICT.items():
-            print(f'{i} === {y}')
-            bot.forward_message(message.from_user.id, y['channel_id'], y['message_id'])
+        today = datetime.now()
+        with open('announce.json', 'r') as f:
+            data = json.load(f)
+        for i, y in data.items():
+            date_to_end = datetime.strptime(y['date_to_end'], '%d.%m.%y %H:%M')
+            if date_to_end >= today:
+                bot.forward_message(message.from_user.id, y['channel_id'], y['message_id'])
     except Exception as e:
         print(e)
         print('in resend_announce_from_channel()')
@@ -231,11 +232,10 @@ def resend_announce_from_channel(message):
 @bot.message_handler(regexp='Расписание на неделю', chat_types=['private'])
 def resend_week_schedule_from_channel(message):
     try:
-        f = open('schedule_data.txt')
-        id_array = [line.strip() for line in f]
+        with open('schedule_data.txt') as f:
+            id_array = [line.strip() for line in f]
         SCHEDULE_CHANNEL_ID = int(id_array[0])
         SCHEDULE_MESSAGE_ID = int(id_array[1])
-        f.close()
 
         bot.forward_message(message.from_user.id, SCHEDULE_CHANNEL_ID, SCHEDULE_MESSAGE_ID)
     except Exception as e:
@@ -246,20 +246,30 @@ def resend_week_schedule_from_channel(message):
 @bot.message_handler(content_types=['photo'])
 def search_new_events(message):
     try:
-        a = 'a'
         if (message.caption is not None and ('#расписание' in message.caption or '#Расписание' in message.caption)):
-            f = open('schedule_data.txt', 'w')
-            f.write(f'{message.chat.id}\n{message.message_id}')
-            f.close()
+            with open('schedule_data.txt', 'w') as f:
+                f.write(f'{message.chat.id}\n{message.message_id}')
         else:
             print('Error, have not #расписание')
 
         if (message.caption is not None and ('#анонс' in message.caption or '#Анонс' in message.caption)):
-            global ANNOUNCE_DICT, n
-            date = '12.02.2023 18:30:00'
-            ANNOUNCE_DICT.update(
-                {a + str(n): {'channel_id': message.chat.id, 'message_id': message.message_id, 'date_to_end': date}})
-            n = n + 1
+            with open('announce.json', 'r') as f:
+                data = json.load(f)
+                n = int(list(data.keys())[-1])
+            caption = message.caption
+            index = int
+
+            if '#Анонс' in message.caption:
+                index = caption.find('#Анонс')
+            elif '#анонс' in message.caption:
+                index = caption.find('#анонс')
+
+            date = caption[index + 7:]
+            data.update(
+                {str(n + 1): {'channel_id': message.chat.id, 'message_id': message.message_id, 'date_to_end': date}})
+
+            with open('announce.json', 'w') as f:
+                json.dump(data, f)
         else:
             print('Error, have not #анонс')
     except Exception as e:
@@ -273,9 +283,8 @@ def nearby_home_groups_info(message):
         global STATION
         current_station = []
         text = ''
-        f = open('nearby.json')
-        subways_with_nearby = json.load(f)
-        f.close()
+        with open('nearby.json') as f:
+            subways_with_nearby = json.load(f)
 
         for i in subways_with_nearby.keys():
             for v in subways_with_nearby[i]:
