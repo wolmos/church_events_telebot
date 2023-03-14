@@ -130,4 +130,4 @@ dmypy.json
 
 # Temp files
 schedule_data.txt
-announce_data.txt
+announce.json
