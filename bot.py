@@ -117,6 +117,14 @@ def save_accounts_data(message):
         print(e)
 
 
+def mailing(channel_id, message_id):
+    with open('accounts.json') as f:
+        users = json.load(f)
+
+    for n, user in users.items():
+        bot.forward_message(user['id'], channel_id, message_id)
+
+
 def check_is_subway(message):
     return message.text.lower() in MOSCOW_SUBWAYS
 
@@ -248,13 +256,13 @@ def resend_announce_from_channel(message):
         today = datetime.now()
         with open('announce.json', 'r') as f:
             data = json.load(f)
-        for i, y in data.items():
-            date_to_end = datetime.strptime(y['date_to_end'], '%d.%m.%y %H:%M')
-            if date_to_end >= today:
-                bot.forward_message(message.from_user.id, y['channel_id'], y['message_id'])
+        for n, item in data.items():
+            if item['date_to_end']:
+                date_to_end = datetime.strptime(item['date_to_end'], '%d.%m.%y %H:%M')
+                if date_to_end > today:
+                    bot.forward_message(message.from_user.id, item['channel_id'], item['message_id'])
     except Exception as e:
-        print(e)
-        print('in resend_announce_from_channel()')
+        print(e.with_traceback())
 
 
 @bot.message_handler(regexp='Расписание на неделю', chat_types=['private'], func=save_accounts_data)
@@ -277,8 +285,6 @@ def search_new_events(message):
         if (message.caption is not None and ('#расписание' in message.caption or '#Расписание' in message.caption)):
             with open('schedule_data.txt', 'w') as f:
                 f.write(f'{message.chat.id}\n{message.message_id}')
-        else:
-            print('Error, have not #расписание')
 
         if (message.caption is not None and ('#анонс' in message.caption or '#Анонс' in message.caption)):
             with open('announce.json', 'r') as f:
@@ -293,16 +299,19 @@ def search_new_events(message):
                 index = caption.find('#анонс')
 
             date = caption[index + 7:]
-            data.update(
-                {str(n + 1): {'channel_id': message.chat.id, 'message_id': message.message_id, 'date_to_end': date}})
+            if date:
+                data.update(
+                    {str(n + 1): {'channel_id': message.chat.id, 'message_id': message.message_id,
+                                  'date_to_end': date}})
+                with open('announce.json', 'w') as f:
+                    json.dump(data, f)
 
-            with open('announce.json', 'w') as f:
-                json.dump(data, f)
-        else:
-            print('Error, have not #анонс')
+                mailing(message.chat.id, message.message_id)
+
+            else:
+                print('Дата и время не указаны')
     except Exception as e:
-        print(e)
-        print('in search_new_events()')
+        print(e.with_traceback())
 
 
 @bot.message_handler(regexp='Показать', chat_types=['private'])
