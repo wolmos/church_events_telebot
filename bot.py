@@ -4,6 +4,8 @@ import json
 import telebot
 from sqlalchemy import create_engine
 import pandas as pd
+import logging
+from loguru import logger
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, \
     ReplyKeyboardRemove, InputMediaPhoto
 
@@ -14,6 +16,27 @@ from keyboards import inline_button
 bot = telebot.TeleBot(config.bot_token)
 ENGINE = create_engine(
     f'postgresql://{config.db_user}:{config.db_password}@{config.db_hostname}:{config.db_port}/{config.db_name}?sslmode=require')
+
+class InterceptHandler(logging.Handler):
+    def emit(self, record):
+        # Get corresponding Loguru level if it exists
+        try:
+            level = logger.level(record.levelname).name
+        except ValueError:
+            level = record.levelno
+
+        # Find caller from where originated the logged message
+        frame, depth = logging.currentframe(), 2
+        while frame.f_code.co_filename == logging.__file__:
+            frame = frame.f_back
+            depth += 1
+
+        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
+
+# Intercepting log messages from third-party libs (e.g. Telebot) that have level INFO (20) or higher
+logging.basicConfig(handlers=[InterceptHandler()], level=20)
+
+logger.add("debug.log", format="{time} {level: <8} [{thread.name: <16}] {message}", level="DEBUG", rotation="3 MB", compression="zip")
 
 STATION = ''
 MOSCOW_SUBWAYS = ['щелковская', 'авиамоторная', 'автозаводская', 'академическая', 'александровский сад', 'алексеевская',
@@ -67,7 +90,7 @@ def get_home_group_master_data(engine):
 		    """
         return pd.read_sql(sql, engine)
     except Exception as e:
-        print(e)
+        logger.exception(e)
 
 
 def get_list_subway_of_home_group(engine):
@@ -86,7 +109,7 @@ def get_list_subway_of_home_group(engine):
 
         return array_of_subways
     except Exception as e:
-        print(e)
+        logger.exception(e)
 
 
 def save_accounts_data(message):
@@ -114,7 +137,7 @@ def save_accounts_data(message):
             json.dump(data, f)
         return True
     except Exception as e:
-        print(e)
+        logger.exception(e)
 
 
 def mailing(channel_id, message_id):
@@ -152,7 +175,7 @@ def check_group_is_wolrus(message):
             return True
         return False
     except Exception as e:
-        print(e)
+        logger.exception(e)
 
 
 def send_map(message):
@@ -214,7 +237,7 @@ def first_message(message):
         start_text = 'Привет, это церковный бот!\nЗдесь ты найдешь основную информацию о церкви и предстоящих событиях. Выбери первый запрос:'
         bot.send_message(message.from_user.id, start_text, reply_markup=kb_menu.menu_kb)
     except Exception as e:
-        print(e)
+        logger.exception(e)
 
 
 @bot.message_handler(regexp='Назад', chat_types=['private'])
@@ -222,7 +245,7 @@ def get_back_reply_markup(message):
     try:
         bot.send_message(message.from_user.id, 'Вернулись к началу', reply_markup=kb_menu.menu_kb)
     except Exception as e:
-        print(e)
+        logger.exception(e)
 
 
 @bot.message_handler(regexp='Пожертвовать', chat_types=['private'], func=save_accounts_data)
@@ -239,7 +262,7 @@ def donate_message(message):
 Спасибо за ваши пожертвования!'''
         bot.send_message(message.from_user.id, donate_msg, reply_markup=inline_button.donate_kb)
     except Exception as e:
-        print(e)
+        logger.exception(e)
 
 
 @bot.message_handler(regexp='Мероприятия', chat_types=['private'], func=save_accounts_data)
@@ -247,7 +270,7 @@ def event(message):
     try:
         bot.send_message(message.from_user.id, 'Выберите, что вас интересует!', reply_markup=kb_menu.event_kb)
     except Exception as e:
-        print(e)
+        logger.exception(e)
 
 
 @bot.message_handler(regexp='Анонсы', chat_types=['private'], func=save_accounts_data)
@@ -262,7 +285,7 @@ def resend_announce_from_channel(message):
                 if date_to_end > today:
                     bot.forward_message(message.from_user.id, item['channel_id'], item['message_id'])
     except Exception as e:
-        print(e.with_traceback())
+        logger.exception(e)
 
 
 @bot.message_handler(regexp='Расписание на неделю', chat_types=['private'], func=save_accounts_data)
@@ -275,8 +298,7 @@ def resend_week_schedule_from_channel(message):
 
         bot.forward_message(message.from_user.id, SCHEDULE_CHANNEL_ID, SCHEDULE_MESSAGE_ID)
     except Exception as e:
-        print(e)
-        print('in resend_week_schedule_from_channel()')
+        logger.exception(e)
 
 
 @bot.message_handler(content_types=['photo'])
@@ -311,7 +333,7 @@ def search_new_events(message):
             else:
                 print('Дата и время не указаны')
     except Exception as e:
-        print(e.with_traceback())
+        logger.exception(e)
 
 
 @bot.message_handler(regexp='Показать', chat_types=['private'])
@@ -342,7 +364,7 @@ def nearby_home_groups_info(message):
             text = text + f'{i["type_of_hg"]} {i["type_age"]}\n{i["weekday"]} {i["time_of_hg"]}\nЛидер: {i["name_leader"]}\nСтанция: {i["subway"]}\n\n'
         bot.send_message(message.from_user.id, text, reply_markup=inline_button.hg_kb)
     except Exception as e:
-        print(e)
+        logger.exception(e)
 
 
 @bot.message_handler(func=check_is_subway, chat_types=['private'])
@@ -373,7 +395,7 @@ def get_home_group_info(message):
 https://wolrus.org/homegroup'''
             bot.send_message(message.from_user.id, text, reply_markup=kb_menu.about_us_kb, parse_mode='HTML')
     except Exception as e:
-        print(e)
+        logger.exception(e)
 
 
 @bot.message_handler(chat_types=['private'], func=save_accounts_data)
@@ -387,7 +409,7 @@ def answer_message(message):
         if text != 'Ошибка':
             bot.send_message(message.from_user.id, text, reply_markup=kb_menu.about_us_kb, parse_mode='HTML')
     except Exception as e:
-        print(e)
+        logger.exception(e)
 
 
 bot.polling()
